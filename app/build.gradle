@@ -43,6 +43,7 @@ dependencies {
 
     //Firebase
     implementation 'com.google.firebase:firebase-auth:20.0.4'
+    implementation 'com.google.android.gms:play-services-auth:19.0.0'
 
     //ButterKnife and Implementation
     implementation 'com.jakewharton:butterknife:10.2.3'

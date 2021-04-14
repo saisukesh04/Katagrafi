@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "606340089526-33890a9bt2gi67mmkcg1a613a0ljkodk.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.undamped.katagraf",
+            "certificate_hash": "619012abe5948e0fa40645440db60c89a09f0dc3"
+          }
+        },
+        {
           "client_id": "606340089526-ff8ofv20ktgc8e8rl3egkbq35t4i9c9p.apps.googleusercontent.com",
           "client_type": 3
         }
