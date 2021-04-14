@@ -36,6 +36,7 @@ public class MainActivity extends AppCompatActivity {
 
         scanFloatingBtn.setOnClickListener(view -> {
             getSupportFragmentManager().beginTransaction().replace(R.id.nav_host_frame, new ScanFragment()).commit();
+            setItemCheckable(false);
         });
 
         bottomNavigation.setSelectedItemId(R.id.action_inventory);
@@ -45,14 +46,21 @@ public class MainActivity extends AppCompatActivity {
             switch (item.getItemId()) {
                 case R.id.action_profile:
                     getSupportFragmentManager().beginTransaction().replace(R.id.nav_host_frame, new ProfileFragment()).commit();
+                    setItemCheckable(true);
                     return true;
 
                 case R.id.action_inventory:
                     getSupportFragmentManager().beginTransaction().replace(R.id.nav_host_frame, new InventoryFragment()).commit();
+                    setItemCheckable(true);
                     return true;
             }
             return false;
         });
+    }
+
+    private void setItemCheckable(boolean b) {
+        bottomNavigation.getMenu().getItem(0).setCheckable(b);
+        bottomNavigation.getMenu().getItem(2).setCheckable(b);
     }
 
     @Override
