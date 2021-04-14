@@ -3,6 +3,9 @@ package com.undamped.katagraf.models;
 import androidx.room.Entity;
 import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
+import androidx.room.TypeConverters;
+
+import com.undamped.katagraf.tools.DataConverter;
 
 import java.util.List;
 
@@ -59,6 +62,7 @@ public class Item {
         this.quantity = quantity;
     }
 
+    @TypeConverters(DataConverter.class)
     public List<String> getIngredients() {
         return ingredients;
     }
