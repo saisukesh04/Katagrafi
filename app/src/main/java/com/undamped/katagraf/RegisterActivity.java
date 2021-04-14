@@ -38,7 +38,9 @@ public class RegisterActivity extends AppCompatActivity {
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
 
         clickLogin.setOnClickListener(view -> {
-            startActivity(new Intent(RegisterActivity.this, LoginActivity.class));
+            Intent intent = new Intent(RegisterActivity.this, StartActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
             finish();
         });
 

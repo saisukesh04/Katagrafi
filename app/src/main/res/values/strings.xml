@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Katagrafí</string>
+    <string name="agreement_text">by signing up you are agreeing to our <br></br>privacy policy and terms of service</string>
 </resources>

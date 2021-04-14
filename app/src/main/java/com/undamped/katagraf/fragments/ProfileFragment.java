@@ -14,6 +14,7 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.undamped.katagraf.LoginActivity;
 import com.undamped.katagraf.R;
+import com.undamped.katagraf.StartActivity;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -34,7 +35,7 @@ public class ProfileFragment extends Fragment {
         logoutBtn.setOnClickListener(view -> {
             FirebaseAuth.getInstance().signOut();
             Snackbar.make(view, "Successfully Signed out", Snackbar.LENGTH_LONG).show();
-            Intent logoutIntent = new Intent(getContext(), LoginActivity.class);
+            Intent logoutIntent = new Intent(getContext(), StartActivity.class);
             logoutIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(logoutIntent);
             getActivity().finish();
