@@ -3,6 +3,11 @@ package com.undamped.katagraf.models;
 import androidx.room.Entity;
 import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
+import androidx.room.TypeConverters;
+
+import com.undamped.katagraf.tools.DataConverter;
+
+import java.util.List;
 
 @Entity(tableName = "productDb")
 public class Product {
@@ -13,15 +18,17 @@ public class Product {
     private long barCode;
     private String name;
     private int bestBefore;
+    private List<String> ingredients;
 
     public Product() {
     }
 
     @Ignore
-    public Product(long barCode, String name, int bestBefore) {
+    public Product(long barCode, String name, int bestBefore, List<String> ingredients) {
         this.barCode = barCode;
         this.name = name;
         this.bestBefore = bestBefore;
+        this.ingredients = ingredients;
     }
 
     public int getPrimary_key() {
@@ -54,5 +61,14 @@ public class Product {
 
     public void setBestBefore(int bestBefore) {
         this.bestBefore = bestBefore;
+    }
+
+    @TypeConverters(DataConverter.class)
+    public List<String> getIngredients() {
+        return ingredients;
+    }
+
+    public void setIngredients(List<String> ingredients) {
+        this.ingredients = ingredients;
     }
 }
