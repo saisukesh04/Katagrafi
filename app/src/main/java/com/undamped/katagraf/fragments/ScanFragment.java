@@ -1,7 +1,12 @@
 package com.undamped.katagraf.fragments;
 
+import android.app.AlarmManager;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
@@ -25,30 +30,48 @@ import com.undamped.katagraf.database.ItemDatabase;
 import com.undamped.katagraf.database.ProductDatabase;
 import com.undamped.katagraf.models.Item;
 import com.undamped.katagraf.models.Product;
+import com.undamped.katagraf.notif.ReminderBroadcast;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+import static android.content.Context.ALARM_SERVICE;
+
 public class ScanFragment extends Fragment {
 
-    @BindView(R.id.scan_barcode) ImageView scan_barcode;
-    @BindView(R.id.productID) EditText productID;
-    @BindView(R.id.detailsLayout) ConstraintLayout detailsLayout;
-    @BindView(R.id.productName) EditText productName;
-    @BindView(R.id.textMFD) EditText textMFD;
-    @BindView(R.id.textBestBefore) EditText textBestBefore;
-    @BindView(R.id.quantityText) EditText quantityText;
-    @BindView(R.id.ingredientText) EditText ingredientText;
-    @BindView(R.id.filledNameField) TextInputLayout nameLayout;
-    @BindView(R.id.filledMFDField) TextInputLayout mfdLayout;
-    @BindView(R.id.filledBBTextField) TextInputLayout bbLayout;
-    @BindView(R.id.filledQuantityField) TextInputLayout quantityLayout;
-    @BindView(R.id.ingredientsField) TextInputLayout ingredientsField;
-    @BindView(R.id.saveButton) Button saveButton;
+    @BindView(R.id.scan_barcode)
+    ImageView scan_barcode;
+    @BindView(R.id.productID)
+    EditText productID;
+    @BindView(R.id.detailsLayout)
+    ConstraintLayout detailsLayout;
+    @BindView(R.id.productName)
+    EditText productName;
+    @BindView(R.id.textMFD)
+    EditText textMFD;
+    @BindView(R.id.textBestBefore)
+    EditText textBestBefore;
+    @BindView(R.id.quantityText)
+    EditText quantityText;
+    @BindView(R.id.ingredientText)
+    EditText ingredientText;
+    @BindView(R.id.filledNameField)
+    TextInputLayout nameLayout;
+    @BindView(R.id.filledMFDField)
+    TextInputLayout mfdLayout;
+    @BindView(R.id.filledBBTextField)
+    TextInputLayout bbLayout;
+    @BindView(R.id.filledQuantityField)
+    TextInputLayout quantityLayout;
+    @BindView(R.id.ingredientsField)
+    TextInputLayout ingredientsField;
+    @BindView(R.id.saveButton)
+    Button saveButton;
 
     private boolean productExists;
 
@@ -60,6 +83,7 @@ public class ScanFragment extends Fragment {
         View root = inflater.inflate(R.layout.fragment_scan, container, false);
 
         ButterKnife.bind(this, root);
+        createNotificationChannel();
 
         scan_barcode.setOnClickListener(view -> {
             IntentIntegrator intentIntegrator = new IntentIntegrator(this.getActivity()).forSupportFragment(this);
@@ -157,6 +181,7 @@ public class ScanFragment extends Fragment {
             //Save it to database and OnSuccess move to HomeFragment
             ItemDatabase itemDb = ItemDatabase.getInstance(getContext());
             itemDb.ItemDao().insertItem(item);
+            createNotification(item);
             Toast.makeText(getContext(), "Item added to database", Toast.LENGTH_LONG).show();
             getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.nav_host_frame, new InventoryFragment()).commit();
         }
@@ -164,5 +189,36 @@ public class ScanFragment extends Fragment {
 
     private void saveProductToMongo(String barcode, EditText productName, String bestBefore, List<String> ingredients) {
         //TODO : Save the product to mongoDb
+    }
+
+    private void createNotification(Item item) {
+        Intent intent = new Intent(getContext(), ReminderBroadcast.class);
+        intent.putExtra("ItemName", item.getName());
+
+        AlarmManager alarmManager = (AlarmManager) getContext().getSystemService(ALARM_SERVICE);
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.YEAR, calendar.get(Calendar.YEAR));
+        calendar.set(Calendar.MONTH, calendar.get(Calendar.MONTH));
+        calendar.set(Calendar.DAY_OF_MONTH, calendar.get(Calendar.DAY_OF_MONTH));
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+
+        calendar.set(Calendar.HOUR_OF_DAY, 9);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(getContext(), (int) System.currentTimeMillis(), intent, 0);
+        alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
+    }
+
+    private void createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = "ReminderChannel";
+            String description = "Channel for reminder";
+            int importance = NotificationManager.IMPORTANCE_HIGH;
+            NotificationChannel channel = new NotificationChannel("notifyUs", name, importance);
+            channel.setDescription(description);
+
+            NotificationManager notificationManager = getContext().getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
     }
 }
