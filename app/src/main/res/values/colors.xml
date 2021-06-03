@@ -13,4 +13,5 @@
     <color name="yellow_brown">#FDBE3B</color>
     <color name="colorTextHint">#7B7B7B</color>
     <color name="colorIcons">#2F2D2E</color>
+    <color name="gray">#535353</color>
 </resources>
