@@ -1,12 +1,15 @@
 package com.undamped.katagraf.fragments;
 
 import android.app.AlarmManager;
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 
@@ -66,6 +69,7 @@ public class ScanFragment extends Fragment {
 
     private boolean productExists;
     private Calendar dateCalendar;
+    private String allergyText;
 
     public ScanFragment() {
     }
@@ -76,6 +80,9 @@ public class ScanFragment extends Fragment {
 
         ButterKnife.bind(this, root);
         createNotificationChannel();
+
+        SharedPreferences prefs = getContext().getSharedPreferences("ProfilePrefs", Context.MODE_PRIVATE);
+        allergyText = prefs.getString("Allergy", "null");
 
         scan_barcode.setOnClickListener(view -> {
             IntentIntegrator intentIntegrator = new IntentIntegrator(this.getActivity()).forSupportFragment(this);
@@ -93,11 +100,11 @@ public class ScanFragment extends Fragment {
             }
 
             String barcode = productID.getText().toString();
-            if (barcode.length() == 12) {
+//            if (barcode.length() == 13) {
                 searchProduct(productID.getText().toString());
                 fetch_button.setVisibility(View.GONE);
-            } else
-                Snackbar.make(view, "Enter a proper barcode!", Snackbar.LENGTH_LONG).show();
+//            } else
+//                Snackbar.make(view, "Enter a proper barcode!", Snackbar.LENGTH_LONG).show();
         });
 
         Calendar calendar = Calendar.getInstance();
@@ -115,8 +122,6 @@ public class ScanFragment extends Fragment {
                     dateCalendar.set(Calendar.MONTH, month);
                     dateCalendar.set(Calendar.DATE, date);
                     textMFD.setText(DateFormat.format("EEEE, MMM d yyyy", dateCalendar).toString());
-//                    dateMeeting = String.valueOf(DateFormat.format("d MMM", dateCalendar));
-
                 }
             }, YEAR, MONTH, DATE);
 
@@ -206,6 +211,18 @@ public class ScanFragment extends Fragment {
             dateCalendar.add(Calendar.MONTH, Integer.parseInt(bestBefore));
             String expDate = DateFormat.format("EEEE, MMM d yyyy", dateCalendar).toString();
             List<String> ingredients = Arrays.asList(ingredientsText.split(",|, "));
+
+            for (String ing : ingredients) {
+                if (allergyText.contains(ing)){
+                    AlertDialog alertDialog = new AlertDialog.Builder(getContext()).create();
+                    alertDialog.setTitle("Allergy Alert");
+                    alertDialog.setMessage("This item has some allergy causing ingredients!");
+                    alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                            (dialog, which) -> dialog.dismiss());
+                    alertDialog.show();
+                    break;
+                }
+            }
 
             if (!productExists)
                 saveProductToDb(productID.getText().toString(), name, bestBefore, ingredients);

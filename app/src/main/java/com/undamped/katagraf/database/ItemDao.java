@@ -19,4 +19,7 @@ public interface ItemDao {
 
     @Query("DELETE FROM itemDb WHERE primary_key = :primary")
     void deleteItem(long primary);
+
+    @Query("DELETE FROM itemDb")
+    void removeAllItems();
 }

@@ -46,7 +46,7 @@
         android:layout_marginTop="24dp"
         android:fontFamily="@font/montserrat_bold"
         android:gravity="center"
-        android:text="User's name"
+        android:text="Sai Sukesh"
         android:textColor="@color/yellow_brown"
         android:textSize="28sp"
         android:textStyle="bold"
@@ -58,7 +58,7 @@
         android:id="@+id/linearLayout2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="28dp"
+        android:layout_marginStart="12dp"
         android:layout_marginTop="16dp"
         android:orientation="vertical"
         app:layout_constraintStart_toStartOf="parent"
@@ -125,7 +125,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="12dp"
-            android:text="45FJDKS2939Code"
+            android:text="60af35eb8d9c52becf35d59"
             android:textColor="@color/black"
             android:textSize="16sp" />
 
@@ -138,6 +138,7 @@
             android:textSize="16sp" />
 
         <TextView
+            android:id="@+id/profile_mail"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="12dp"
@@ -146,6 +147,7 @@
             android:textSize="16sp" />
 
         <TextView
+            android:id="@+id/allergiesText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="12dp"

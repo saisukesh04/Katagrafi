@@ -1,6 +1,7 @@
 package com.undamped.katagraf.fragments;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -19,6 +20,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
@@ -35,6 +37,7 @@ import com.theartofdev.edmodo.cropper.CropImageView;
 import com.undamped.katagraf.LoginActivity;
 import com.undamped.katagraf.R;
 import com.undamped.katagraf.StartActivity;
+import com.undamped.katagraf.database.ItemDatabase;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -47,11 +50,16 @@ public class ProfileFragment extends Fragment {
     @BindView(R.id.profile_progress) ProgressBar profile_progress;
     @BindView(R.id.profile_image) CircleImageView profile_image;
     @BindView(R.id.profile_image_edit) ImageView profile_image_edit;
+    @BindView(R.id.profile_mail) TextView profile_mail;
+    @BindView(R.id.profile_name) TextView profile_name;
+    @BindView(R.id.allergiesText) TextView allergiesText;
     @BindView(R.id.update_button) Button update_button;
     @BindView(R.id.logoutBtn) Button logoutBtn;
 
     final public int IMAGE_CODE = 1;
     private Uri profileImageURI;
+    private SharedPreferences pref;
+    private SharedPreferences.Editor Ed;
 
     public ProfileFragment() {
     }
@@ -61,6 +69,18 @@ public class ProfileFragment extends Fragment {
         View root = inflater.inflate(R.layout.fragment_profile, container, false);
 
         ButterKnife.bind(this, root);
+
+        pref = getContext().getSharedPreferences("ProfilePrefs", Context.MODE_PRIVATE);
+        Ed = pref.edit();
+
+        String image = pref.getString("Image","null");
+        profile_name.setText(pref.getString("Name","Sai Sukesh"));
+        allergiesText.setText(pref.getString("Allergy","-"));
+
+        if (!image.equals("null"))
+            Glide.with(getContext()).load(Uri.parse(image)).into(profile_image);
+
+        profile_mail.setText(FirebaseAuth.getInstance().getCurrentUser().getEmail());
 
         profile_image_edit.setOnClickListener(v -> {
             if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.READ_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED){
@@ -79,6 +99,7 @@ public class ProfileFragment extends Fragment {
 
         logoutBtn.setOnClickListener(view -> {
             FirebaseAuth.getInstance().signOut();
+            ItemDatabase.getInstance(getContext()).ItemDao().removeAllItems();
             Snackbar.make(view, "Successfully Signed out", Snackbar.LENGTH_LONG).show();
             Intent logoutIntent = new Intent(getContext(), StartActivity.class);
             logoutIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -86,6 +107,8 @@ public class ProfileFragment extends Fragment {
             getActivity().finish();
         });
 
+        Ed.putString("Allergy","Groundnuts, Glucose, Sugar, Fructose");
+        Ed.apply();
         return root;
     }
 
@@ -146,10 +169,11 @@ public class ProfileFragment extends Fragment {
                     if (task.isSuccessful()) {
                         String downloadUrl = task.getResult().toString();
 
+                        Ed.putString("Image", downloadUrl);
+                        Ed.apply();
+
                         //TODO: Add the imageURI to shared preferences also
-
                         //TODO: Add the image url to mongodb
-
                     }else{
                         update_button.setEnabled(true);
                         update_button.setAlpha(1);
