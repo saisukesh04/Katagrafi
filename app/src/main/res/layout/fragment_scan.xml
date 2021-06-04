@@ -19,7 +19,7 @@
         android:imeOptions="actionDone"
         android:importantForAutofill="no"
         android:includeFontPadding="false"
-        android:inputType="text"
+        android:inputType="numberSigned"
         android:textSize="16sp"
         app:layout_constraintEnd_toStartOf="@+id/scan_barcode"
         app:layout_constraintStart_toStartOf="parent"
@@ -35,6 +35,20 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:tint="@color/colorIcons" />
+
+    <Button
+        android:id="@+id/fetch_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/button_background"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:text="Fetch Item"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/productID" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/detailsLayout"
@@ -96,44 +110,33 @@
             android:id="@+id/linearLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
+            android:layout_marginStart="8dp"
             android:layout_marginTop="16dp"
             android:layout_marginEnd="16dp"
-            android:elevation="16dp"
+            android:elevation="8dp"
             android:orientation="horizontal"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/filledNameField">
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/filledMFDField"
+            <Button
+                android:id="@+id/textMFD"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="4dp"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
                 android:layout_weight="1"
                 android:elevation="16dp"
                 android:gravity="center"
-                android:hint="Manufacturing Date"
-                app:boxCornerRadiusTopEnd="8dp"
-                app:boxCornerRadiusTopStart="8dp"
-                app:helperTextTextColor="@android:color/darker_gray">
-
-                <EditText
-                    android:id="@+id/textMFD"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/ubuntu_regular"
-                    android:includeFontPadding="false"
-                    android:inputType="date"
-                    android:textColor="@color/black"
-                    android:textSize="16sp" />
-            </com.google.android.material.textfield.TextInputLayout>
+                android:text="Manufacturing Date"
+                android:background="@drawable/btn_bg" />
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/filledBBTextField"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="4dp"
+                android:layout_marginStart="18dp"
                 android:layout_weight="1"
                 android:elevation="16dp"
                 android:gravity="center"

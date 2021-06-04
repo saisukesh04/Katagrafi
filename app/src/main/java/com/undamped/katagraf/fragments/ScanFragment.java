@@ -1,6 +1,7 @@
 package com.undamped.katagraf.fragments;
 
 import android.app.AlarmManager;
+import android.app.DatePickerDialog;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -13,15 +14,19 @@ import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 
+import android.text.format.DateFormat;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
@@ -44,36 +49,23 @@ import static android.content.Context.ALARM_SERVICE;
 
 public class ScanFragment extends Fragment {
 
-    @BindView(R.id.scan_barcode)
-    ImageView scan_barcode;
-    @BindView(R.id.productID)
-    EditText productID;
-    @BindView(R.id.detailsLayout)
-    ConstraintLayout detailsLayout;
-    @BindView(R.id.productName)
-    EditText productName;
-    @BindView(R.id.textMFD)
-    EditText textMFD;
-    @BindView(R.id.textBestBefore)
-    EditText textBestBefore;
-    @BindView(R.id.quantityText)
-    EditText quantityText;
-    @BindView(R.id.ingredientText)
-    EditText ingredientText;
-    @BindView(R.id.filledNameField)
-    TextInputLayout nameLayout;
-    @BindView(R.id.filledMFDField)
-    TextInputLayout mfdLayout;
-    @BindView(R.id.filledBBTextField)
-    TextInputLayout bbLayout;
-    @BindView(R.id.filledQuantityField)
-    TextInputLayout quantityLayout;
-    @BindView(R.id.ingredientsField)
-    TextInputLayout ingredientsField;
-    @BindView(R.id.saveButton)
-    Button saveButton;
+    @BindView(R.id.scan_barcode) ImageView scan_barcode;
+    @BindView(R.id.productID) EditText productID;
+    @BindView(R.id.detailsLayout) ConstraintLayout detailsLayout;
+    @BindView(R.id.productName) EditText productName;
+    @BindView(R.id.textMFD) Button textMFD;
+    @BindView(R.id.textBestBefore) EditText textBestBefore;
+    @BindView(R.id.quantityText) EditText quantityText;
+    @BindView(R.id.ingredientText) EditText ingredientText;
+    @BindView(R.id.filledNameField) TextInputLayout nameLayout;
+    @BindView(R.id.filledBBTextField) TextInputLayout bbLayout;
+    @BindView(R.id.filledQuantityField) TextInputLayout quantityLayout;
+    @BindView(R.id.ingredientsField) TextInputLayout ingredientsField;
+    @BindView(R.id.saveButton) Button saveButton;
+    @BindView(R.id.fetch_button) Button fetch_button;
 
     private boolean productExists;
+    private Calendar dateCalendar;
 
     public ScanFragment() {
     }
@@ -90,6 +82,45 @@ public class ScanFragment extends Fragment {
             intentIntegrator.setPrompt("Scan a item's QR Code");
             intentIntegrator.setOrientationLocked(false);
             intentIntegrator.initiateScan();
+        });
+
+        fetch_button.setOnClickListener(view -> {
+            try {
+                InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(getActivity().getCurrentFocus().getWindowToken(), 0);
+            } catch (Exception e){
+                Log.e("Error:","Keyboard not opened");
+            }
+
+            String barcode = productID.getText().toString();
+            if (barcode.length() == 12) {
+                searchProduct(productID.getText().toString());
+                fetch_button.setVisibility(View.GONE);
+            } else
+                Snackbar.make(view, "Enter a proper barcode!", Snackbar.LENGTH_LONG).show();
+        });
+
+        Calendar calendar = Calendar.getInstance();
+        int YEAR = calendar.get(Calendar.YEAR);
+        int MONTH = calendar.get(Calendar.MONTH);
+        int DATE = calendar.get(Calendar.DATE);
+
+        textMFD.setOnClickListener(view -> {
+            DatePickerDialog datePickerDialog = new DatePickerDialog(getContext(), new DatePickerDialog.OnDateSetListener() {
+                @Override
+                public void onDateSet(DatePicker datePicker, int year, int month, int date) {
+
+                    dateCalendar = Calendar.getInstance();
+                    dateCalendar.set(Calendar.YEAR, year);
+                    dateCalendar.set(Calendar.MONTH, month);
+                    dateCalendar.set(Calendar.DATE, date);
+                    textMFD.setText(DateFormat.format("EEEE, MMM d yyyy", dateCalendar).toString());
+//                    dateMeeting = String.valueOf(DateFormat.format("d MMM", dateCalendar));
+
+                }
+            }, YEAR, MONTH, DATE);
+
+            datePickerDialog.show();
         });
 
         saveButton.setOnClickListener(view -> saveDetail());
@@ -109,6 +140,7 @@ public class ScanFragment extends Fragment {
             } else {
                 // if the intentResult is not null we'll set the content and format of scan message
                 productID.setText(intentResult.getContents());
+                fetch_button.setVisibility(View.GONE);
                 searchProduct(intentResult.getContents());
             }
         } else {
@@ -119,6 +151,7 @@ public class ScanFragment extends Fragment {
     private void searchProduct(String barcode) {
         detailsLayout.setVisibility(View.VISIBLE);
         Product scannedProd = ProductDatabase.getInstance(getContext()).ProductDao().fetchProduct(barcode);
+        productID.setEnabled(false);
 
         if (scannedProd == null) {
             //Entry doesn't exist in the database, ask the user to enter the data
@@ -134,8 +167,9 @@ public class ScanFragment extends Fragment {
             productName.setEnabled(false);
             textBestBefore.setEnabled(false);
             productName.setText(scannedProd.getName());
-            textBestBefore.setText(scannedProd.getBestBefore());
-            ingredientText.setText(scannedProd.getIngredients().toString());
+            textBestBefore.setText(String.valueOf(scannedProd.getBestBefore()));
+            ingredientText.setText(scannedProd.getIngredientString());
+            ingredientText.setEnabled(false);
         }
     }
 
@@ -149,7 +183,6 @@ public class ScanFragment extends Fragment {
         quantityText.clearFocus();
         nameLayout.setError(null);
         bbLayout.setError(null);
-        mfdLayout.setError(null);
         quantityLayout.setError(null);
         ingredientsField.setError(null);
 
@@ -161,20 +194,21 @@ public class ScanFragment extends Fragment {
 
         if (name.trim().isEmpty())
             nameLayout.setError("Product name cannot be empty");
-        else if (manufactureDate.isEmpty())
-            mfdLayout.setError("Manufacturing date cannot be empty");
+        else if (manufactureDate.startsWith("Manufact"))
+            Toast.makeText(getContext(), "Please select the Manufacturing date!", Toast.LENGTH_LONG).show();
         else if (bestBefore.trim().isEmpty())
-            bbLayout.setError("Best before date cannot be empty");
+            bbLayout.setError("Best before month cannot be empty");
         else if (quantity.equals("0") || quantity.isEmpty())
             quantityLayout.setError("Quantity cannot be empty or zero");
         else if (ingredientsText.isEmpty())
             ingredientsField.setError("At least one ingredient must be present");
         else {
-            String expDate = null;
+            dateCalendar.add(Calendar.MONTH, Integer.parseInt(bestBefore));
+            String expDate = DateFormat.format("EEEE, MMM d yyyy", dateCalendar).toString();
             List<String> ingredients = Arrays.asList(ingredientsText.split(",|, "));
 
             if (!productExists)
-                saveProductToMongo(productID.getText().toString(), productName, bestBefore, ingredients);
+                saveProductToDb(productID.getText().toString(), name, bestBefore, ingredients);
 
             Item item = new Item(name, expDate, Integer.parseInt(quantity), ingredients);
 
@@ -187,8 +221,9 @@ public class ScanFragment extends Fragment {
         }
     }
 
-    private void saveProductToMongo(String barcode, EditText productName, String bestBefore, List<String> ingredients) {
-        //TODO : Save the product to mongoDb
+    private void saveProductToDb(String barcode, String productName, String bestBefore, List<String> ingredients) {
+        Product newProd = new Product(Long.parseLong(barcode), productName, Integer.parseInt(bestBefore), ingredients);
+        ProductDatabase.getInstance(getContext()).ProductDao().insertProduct(newProd);
     }
 
     private void createNotification(Item item) {

@@ -63,9 +63,16 @@ public class Product {
         this.bestBefore = bestBefore;
     }
 
-    @TypeConverters(DataConverter.class)
     public List<String> getIngredients() {
         return ingredients;
+    }
+
+    @TypeConverters(DataConverter.class)
+    public String getIngredientString() {
+        String text = "";
+        for (String ing : ingredients)
+            text = text + ing + ",";
+        return text;
     }
 
     public void setIngredients(List<String> ingredients) {
